@@ -20,7 +20,7 @@
 
         <!-- Total Balance Section -->
         <div class="text-center mb-4">
-            <h3>Total Balance: <strong>${{ balance }}</strong></h3>
+            <h3>Total Balance: <strong>R{{ balance }}</strong></h3>
         </div>
 
         <!-- Accounts Section -->
@@ -55,30 +55,6 @@
 
         </table>
 
-    <h3 class="mt-5">Transaction History</h3>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Type</th>
-            <th>Amount</th>
-            <th>Details</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for transaction in transactions %}
-        <tr>
-            <td>{{ transaction.type }}</td>
-            <td>${{ transaction.amount }}</td>
-            <td>{{ transaction.details }}</td>
-        </tr>
-        {% else %}
-        <tr>
-            <td colspan="3" class="text-center">No transactions found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
 
         <!-- Quick Actions Section -->
         <h3 class="mt-5">Quick Actions</h3>
@@ -87,6 +63,9 @@
             <a href="/withdraw" class="btn btn-warning">Withdraw Funds</a>
             <a href="/transfer" class="btn btn-primary">Transfer Funds (Internal)</a>
             <a href="/send_money" class="btn btn-info">Send Money (External)</a>
+            <a href="/transactions" class="btn btn-secondary">View Transaction History</a>
+
+
         </div>
     </div>
 

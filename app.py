@@ -2,25 +2,31 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from controllers.auth_controller import AuthController
 from flask import session
 from models.user_model import UserModel
+
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # For flash messages
+
 
 # Routes
 @app.route("/")
 def home():
     return redirect(url_for("login"))
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     return AuthController.register()
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     return AuthController.login()
 
+
 @app.route("/logout")
 def logout():
     return AuthController.logout()
+
 
 @app.route("/dashboard")
 def dashboard():
@@ -30,10 +36,9 @@ def dashboard():
         return redirect("/login")
 
     user = session["user"]
-
-
     balance = UserModel.get_user(user["username"])["balance"]  # Fetch the user's balance
     return render_template("dashboard.html", user=user, balance=balance)
+
 
 @app.route("/deposit", methods=["GET", "POST"])
 def deposit():
@@ -52,10 +57,14 @@ def deposit():
         new_balance = current_balance + amount
         UserModel.update_balance(user["username"], new_balance)
 
+        # Log the transaction
+        UserModel.log_transaction(user["username"], "Deposit", amount, "Deposit to main account", new_balance)
+
         flash(f"Successfully deposited ${amount:.2f}.")
         return redirect("/dashboard")
 
     return render_template("deposit.html")
+
 
 
 @app.route("/withdraw", methods=["GET", "POST"])
@@ -80,10 +89,14 @@ def withdraw():
         new_balance = current_balance - amount
         UserModel.update_balance(user["username"], new_balance)
 
+        # Log the transaction
+        UserModel.log_transaction(user["username"], "Withdrawal", amount, "Withdrawal from main account", new_balance)
+
         flash(f"Successfully withdrew ${amount:.2f}.")
         return redirect("/dashboard")
 
     return render_template("withdraw.html")
+
 
 
 @app.route("/transfer", methods=["GET", "POST"])
@@ -121,6 +134,7 @@ def transfer():
 
     return render_template("transfer.html")
 
+
 @app.route("/send_money", methods=["GET", "POST"])
 def send_money():
     if "user" not in session:
@@ -147,10 +161,12 @@ def send_money():
         new_balance = current_balance - (amount + transaction_fee)
         UserModel.update_balance(user["username"], new_balance)
 
-        flash(f"Successfully transferred ${amount:.2f} to external account '{external_account}' with a ${transaction_fee:.2f} fee.")
+        flash(
+            f"Successfully transferred ${amount:.2f} to external account '{external_account}' with a ${transaction_fee:.2f} fee.")
         return redirect("/dashboard")
 
     return render_template("send_money.html")
+
 
 @app.route("/accounts", methods=["GET", "POST"])
 def accounts():
@@ -163,7 +179,7 @@ def accounts():
 
     return render_template("accounts.html", accounts=accounts)
 
-# Accounts
+
 @app.route("/create_account", methods=["GET", "POST"])
 def create_account():
     if "user" not in session:
@@ -184,6 +200,19 @@ def create_account():
         return redirect("/accounts")
 
     return render_template("create_account.html")
+
+
+@app.route("/transactions")
+def transactions():
+    if "user" not in session:
+        flash("Please log in to access this feature.")
+        return redirect("/login")
+
+    user = session["user"]
+    transactions = UserModel.get_transaction_history(user["username"])
+
+    return render_template("transactions.html", transactions=transactions)
+
 
 
 if __name__ == "__main__":
