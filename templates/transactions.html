@@ -11,6 +11,31 @@
     <div class="container mt-5">
         <h3 class="text-center">Transaction History</h3>
         <a href="/dashboard" class="btn btn-primary mb-3">Back to Dashboard</a>
+        <a href="/export_transactions" class="btn btn-success mb-3">Export as CSV</a>
+
+        <!-- Filtering Form -->
+        <form method="POST" class="mb-3">
+            <div class="row">
+                <div class="col-md-3">
+                    <select name="transaction_type" class="form-select">
+                        <option value="All">All Transactions</option>
+                        <option value="Deposit">Deposit</option>
+                        <option value="Withdrawal">Withdrawal</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="start_date" class="form-control" placeholder="Start Date">
+                </div>
+                <div class="col-md-3">
+                    <input type="date" name="end_date" class="form-control" placeholder="End Date">
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Transactions Table -->
         <table class="table table-striped">
             <thead>
                 <tr>

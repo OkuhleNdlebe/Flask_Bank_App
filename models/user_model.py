@@ -1,5 +1,6 @@
 import os
 import hashlib
+import uuid
 from datetime import datetime
 
 class UserModel:
@@ -19,13 +20,20 @@ class UserModel:
                 pass  # Create an empty file
 
     @staticmethod
+    def generate_account_number():
+        """Generate a unique 10-digit account number."""
+        return str(uuid.uuid4().int)[:10]
+
+    @staticmethod
     def save_user(name, surname, phone, id_number, email, username, password):
-        """Save user details to the database file and create a default account."""
+        """Save user details to the database file with an account number."""
         UserModel.ensure_database_exists()
         try:
+            account_number = UserModel.generate_account_number()
             with open(UserModel.db_path, "a") as file:
                 # Default balance is set to 0.0
-                file.write(f"{name},{surname},{phone},{id_number},{email},{username},{UserModel.hash_password(password)},0.0\n")
+                file.write(
+                    f"{account_number},{name},{surname},{phone},{id_number},{email},{username},{UserModel.hash_password(password)},0.0\n")
             # Create a default "Savings" account for the new user
             UserModel.add_account(username, "Savings", 0.0)
         except Exception as e:
@@ -39,16 +47,17 @@ class UserModel:
             with open(UserModel.db_path, "r") as file:
                 for line in file:
                     data = line.strip().split(",")
-                    if data[5] == username:  # Username is the 6th field
+                    if data[6] == username:  # Username is now the 7th field
                         return {
-                            "name": data[0],
-                            "surname": data[1],
-                            "phone": data[2],
-                            "id_number": data[3],
-                            "email": data[4],
-                            "username": data[5],
-                            "password_hash": data[6],
-                            "balance": float(data[7]),  # Balance is the last field
+                            "account_number": data[0],
+                            "name": data[1],
+                            "surname": data[2],
+                            "phone": data[3],
+                            "id_number": data[4],
+                            "email": data[5],
+                            "username": data[6],
+                            "password_hash": data[7],
+                            "balance": float(data[8]),  # Balance is the last field
                         }
         except Exception as e:
             print(f"Error retrieving user: {e}")
@@ -63,8 +72,8 @@ class UserModel:
             with open(UserModel.db_path, "r") as file:
                 for line in file:
                     data = line.strip().split(",")
-                    if data[5] == username:
-                        data[7] = str(new_balance)  # Update balance
+                    if data[6] == username:  # Username is the 7th field
+                        data[8] = str(new_balance)  # Update balance (9th field)
                     lines.append(",".join(data))
 
             with open(UserModel.db_path, "w") as file:

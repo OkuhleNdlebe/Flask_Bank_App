@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from controllers.auth_controller import AuthController
 from flask import session
 from models.user_model import UserModel
+import csv
+from flask import make_response
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # For flash messages
@@ -12,7 +14,7 @@ app.secret_key = "your_secret_key"  # For flash messages
 def home():
     return redirect(url_for("login"))
 
-
+## Register
 @app.route("/register", methods=["GET", "POST"])
 def register():
     return AuthController.register()
@@ -35,9 +37,14 @@ def dashboard():
         flash("Please log in to access the dashboard.")
         return redirect("/login")
 
-    user = session["user"]
-    balance = UserModel.get_user(user["username"])["balance"]  # Fetch the user's balance
-    return render_template("dashboard.html", user=user, balance=balance)
+    # Fetch the full user details
+    user = UserModel.get_user(session["user"]["username"])
+    if not user:
+        flash("User not found. Please log in again.")
+        return redirect("/logout")  # Redirect to logout to clear session
+
+    return render_template("dashboard.html", user=user)
+
 
 
 @app.route("/deposit", methods=["GET", "POST"])
@@ -202,7 +209,7 @@ def create_account():
     return render_template("create_account.html")
 
 
-@app.route("/transactions")
+@app.route("/transactions", methods=["GET", "POST"])
 def transactions():
     if "user" not in session:
         flash("Please log in to access this feature.")
@@ -211,8 +218,46 @@ def transactions():
     user = session["user"]
     transactions = UserModel.get_transaction_history(user["username"])
 
+    # Handle filtering
+    if request.method == "POST":
+        transaction_type = request.form.get("transaction_type")
+        start_date = request.form.get("start_date")
+        end_date = request.form.get("end_date")
+
+        # Filter by transaction type
+        if transaction_type and transaction_type != "All":
+            transactions = [txn for txn in transactions if txn["type"] == transaction_type]
+
+        # Filter by date range
+        if start_date:
+            transactions = [txn for txn in transactions if txn["timestamp"] >= start_date]
+        if end_date:
+            transactions = [txn for txn in transactions if txn["timestamp"] <= end_date]
+
     return render_template("transactions.html", transactions=transactions)
 
+
+
+
+@app.route("/export_transactions")
+def export_transactions():
+    if "user" not in session:
+        flash("Please log in to access this feature.")
+        return redirect("/login")
+
+    user = session["user"]
+    transactions = UserModel.get_transaction_history(user["username"])
+
+    # Create a CSV response
+    csv_data = [["Date", "Type", "Amount", "Details", "Balance After"]]
+    for txn in transactions:
+        csv_data.append([txn["timestamp"], txn["type"], txn["amount"], txn["details"], txn["balance_after"]])
+
+    # Generate CSV file as response
+    response = make_response("\n".join([",".join(map(str, row)) for row in csv_data]))
+    response.headers["Content-Disposition"] = "attachment; filename=transactions.csv"
+    response.headers["Content-Type"] = "text/csv"
+    return response
 
 
 if __name__ == "__main__":
