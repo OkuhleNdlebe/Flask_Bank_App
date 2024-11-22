@@ -32,18 +32,18 @@ def logout():
 
 @app.route("/dashboard")
 def dashboard():
-    # Check if the user is logged in
     if "user" not in session:
         flash("Please log in to access the dashboard.")
         return redirect("/login")
 
-    # Fetch the full user details
     user = UserModel.get_user(session["user"]["username"])
     if not user:
         flash("User not found. Please log in again.")
-        return redirect("/logout")  # Redirect to logout to clear session
+        return redirect("/logout")
 
-    return render_template("dashboard.html", user=user)
+    accounts = UserModel.get_accounts(user["username"])
+    return render_template("dashboard.html", user=user, accounts=accounts)
+
 
 
 
@@ -230,9 +230,12 @@ def create_account():
             flash("Initial balance cannot be negative.")
             return render_template("create_account.html")
 
-        UserModel.add_account(user["username"], account_name, initial_balance)
-        flash(f"Account '{account_name}' created successfully with an initial balance of ${initial_balance:.2f}.")
-        return redirect("/accounts")
+        if UserModel.add_account(user["username"], account_name, initial_balance):
+            flash(f"Account '{account_name}' created successfully with an initial balance of R{initial_balance:.2f}.")
+        else:
+            flash("Failed to create account. Ensure sufficient funds and unique account name.")
+
+        return redirect("/dashboard")
 
     return render_template("create_account.html")
 
