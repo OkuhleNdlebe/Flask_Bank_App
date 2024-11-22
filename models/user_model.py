@@ -1,5 +1,6 @@
 import os
 import hashlib
+import uuid
 from datetime import datetime
 
 class UserModel:
@@ -19,13 +20,20 @@ class UserModel:
                 pass  # Create an empty file
 
     @staticmethod
+    def generate_account_number():
+        """Generate a unique 10-digit account number."""
+        return str(uuid.uuid4().int)[:10]
+
+    @staticmethod
     def save_user(name, surname, phone, id_number, email, username, password):
-        """Save user details to the database file and create a default account."""
+        """Save user details to the database file with an account number."""
         UserModel.ensure_database_exists()
         try:
+            account_number = UserModel.generate_account_number()
             with open(UserModel.db_path, "a") as file:
                 # Default balance is set to 0.0
-                file.write(f"{name},{surname},{phone},{id_number},{email},{username},{UserModel.hash_password(password)},0.0\n")
+                file.write(
+                    f"{account_number},{name},{surname},{phone},{id_number},{email},{username},{UserModel.hash_password(password)},0.0\n")
             # Create a default "Savings" account for the new user
             UserModel.add_account(username, "Savings", 0.0)
         except Exception as e:
@@ -39,16 +47,17 @@ class UserModel:
             with open(UserModel.db_path, "r") as file:
                 for line in file:
                     data = line.strip().split(",")
-                    if data[5] == username:  # Username is the 6th field
+                    if data[6] == username:  # Username is now the 7th field
                         return {
-                            "name": data[0],
-                            "surname": data[1],
-                            "phone": data[2],
-                            "id_number": data[3],
-                            "email": data[4],
-                            "username": data[5],
-                            "password_hash": data[6],
-                            "balance": float(data[7]),  # Balance is the last field
+                            "account_number": data[0],
+                            "name": data[1],
+                            "surname": data[2],
+                            "phone": data[3],
+                            "id_number": data[4],
+                            "email": data[5],
+                            "username": data[6],
+                            "password_hash": data[7],
+                            "balance": float(data[8]),  # Balance is the last field
                         }
         except Exception as e:
             print(f"Error retrieving user: {e}")
@@ -63,8 +72,8 @@ class UserModel:
             with open(UserModel.db_path, "r") as file:
                 for line in file:
                     data = line.strip().split(",")
-                    if data[5] == username:
-                        data[7] = str(new_balance)  # Update balance
+                    if data[6] == username:  # Username is the 7th field
+                        data[8] = str(new_balance)  # Update balance (9th field)
                     lines.append(",".join(data))
 
             with open(UserModel.db_path, "w") as file:
@@ -82,16 +91,16 @@ class UserModel:
             with open(UserModel.db_path, "r") as file:
                 for line in file:
                     data = line.strip().split(",")
-                    if data[5] == username:
+                    if data[6] == username:  # Username is the 7th field
                         data = [
                             updates.get("name", data[0]),
-                            updates.get("surname", data[1]),
-                            updates.get("phone", data[2]),
-                            updates.get("id_number", data[3]),
-                            updates.get("email", data[4]),
+                            data[1],  # Surname remains the same
+                            data[2],  # Phone remains the same
+                            data[3],  # ID number remains the same
+                            data[4],  # Email remains the same
                             data[5],  # Username remains the same
-                            data[6],  # Password hash remains the same
-                            updates.get("balance", data[7]),
+                            updates.get("password_hash", data[6]),  # Update password hash if provided
+                            data[7],  # Balance remains the same
                         ]
                     lines.append(",".join(data))
 
@@ -123,9 +132,19 @@ class UserModel:
 
     @staticmethod
     def add_account(username, account_name, initial_balance):
-        """Add a new account for the user."""
+        """Add a new account for the user and deduct from main balance."""
         if initial_balance < 0:
             print(f"Cannot add account with negative balance: {initial_balance}")
+            return False
+
+        user = UserModel.get_user(username)
+        if not user:
+            print(f"User {username} not found.")
+            return False
+
+        # Check if the user has sufficient funds
+        if user["balance"] < initial_balance:
+            print(f"Insufficient funds in main account to create {account_name}.")
             return False
 
         accounts_file = f"database/{username}_accounts.txt"
@@ -134,11 +153,25 @@ class UserModel:
         # Check for duplicate account names
         if any(account["name"] == account_name for account in existing_accounts):
             print(f"Account with name '{account_name}' already exists for user '{username}'.")
-            return False  # Indicate failure to add account
+            return False
 
         try:
+            # Deduct initial balance from main account
+            UserModel.update_balance(username, user["balance"] - initial_balance)
+
+            # Add the new account
             with open(accounts_file, "a") as file:
                 file.write(f"{account_name},{initial_balance}\n")
+
+            # Log the transaction
+            UserModel.log_transaction(
+                username,
+                "Account Creation",
+                initial_balance,
+                f"Created account '{account_name}'",
+                user["balance"] - initial_balance
+            )
+
             return True  # Indicate success
         except Exception as e:
             print(f"Error adding account for {username}: {e}")

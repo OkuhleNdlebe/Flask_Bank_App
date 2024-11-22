@@ -1,0 +1,5 @@
+2024-11-22 10:25:12,Deposit,343.0,Deposit to main account,343.0
+2024-11-22 10:25:21,Deposit,334.0,Deposit to main account,677.0
+2024-11-22 10:41:53,Account Creation,30.0,Created account 'Birthday Savings ',647.0
+2024-11-22 10:44:24,Account Creation,334.0,Created account 'Invest',313.0
+2024-11-22 11:05:27,Withdrawal,30.0,Withdrawal from main account,283.0
