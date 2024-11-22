@@ -9,3 +9,4 @@
 2024-11-21 10:56:06,Withdrawal,200.0,Withdrawal from main account,101.0
 2024-11-21 11:02:12,Withdrawal,6.0,Withdrawal from main account,80.5
 2024-11-21 11:38:24,Deposit,443.0,Deposit to main account,523.5
+2024-11-22 09:24:46,Send Money,127.0,Sent to external account '13243553' (Fee: R2.50),394.0

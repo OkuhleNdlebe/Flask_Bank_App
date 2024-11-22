@@ -9,26 +9,44 @@
     <style>
         /* Background styling */
         body {
-            background: url('/static/images/bank.jpg') no-repeat center center fixed;
+            background: url('/static/images/back.jpg') no-repeat center center fixed;
             background-size: cover;
             color: white;
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            min-height: 100vh;
+        }
+
+        /* Make content scrollable */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 80px; /* Space for the footer */
         }
 
         /* Navbar styling */
         .navbar {
             background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
         .navbar-brand, .navbar-nav .nav-link {
             color: white !important;
+            font-weight: bold;
         }
 
         .navbar-nav .nav-link:hover {
             color: #f8d210 !important;
+        }
+
+        /* Footer styling */
+        footer {
+            text-align: center;
+            padding: 15px 0;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.3);
         }
 
         /* Account and Balance container */
@@ -69,12 +87,16 @@
             color: white;
         }
 
-        /* Footer styling */
-        footer {
-            text-align: center;
-            padding: 10px 0;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar-nav .nav-link {
+                text-align: center;
+                margin: 5px 0;
+            }
+
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -83,12 +105,15 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a href="/dashboard" class="navbar-brand">
-                <i class="bi bi-house"></i> MySite
+                <i class="bi bi-house"></i> InnovatedBank
             </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-person-circle"></i> Profile</a>
+                        <a class="nav-link" href="/profile"><i class="bi bi-person-circle"></i> Profile</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">Logout</a>
@@ -98,88 +123,95 @@
         </div>
     </nav>
 
-    <!-- Dashboard Content -->
-    <div class="container mt-5">
-        <!-- Account Number and Balance -->
-        <div class="account-balance">
-            <div>
-                <h5><strong>Account Number:</strong> {{ user.account_number }}</h5>
+    <!-- Scrollable Content -->
+    <div class="content">
+        <div class="container mt-5">
+            <!-- Account Number and Balance -->
+            <div class="account-balance">
+                <div>
+                    <h5><strong>Account Number:</strong> {{ user.account_number }}</h5>
+                </div>
+                <div>
+                    <h5><strong>Total Balance:</strong> R {{ user.balance }}</h5>
+                </div>
             </div>
-            <div>
-                <h5><strong>Total Balance:</strong> R {{ user.balance }}</h5>
-            </div>
-        </div>
 
-        <!-- Quick Actions Section -->
-        <h3>Quick Actions</h3>
-        <div class="row mt-3 g-4">
-            <div class="col-md-4">
-                <div class="card p-3 text-center">
-                    <h5>Deposit Funds</h5>
-                    <a href="/deposit" class="btn btn-success mt-3">Go</a>
+            <!-- Quick Actions Section -->
+            <h3>Quick Actions</h3>
+            <div class="row mt-3 g-4">
+                <div class="col-md-4">
+                    <div class="card p-3 text-center">
+                        <h5>Deposit Funds</h5>
+                        <a href="/deposit" class="btn btn-success mt-3">Go</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-center">
+                        <h5>Withdraw Funds</h5>
+                        <a href="/withdraw" class="btn btn-warning mt-3">Go</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-center">
+                        <h5>Transfer Funds (Internal)</h5>
+                        <a href="/transfer" class="btn btn-primary mt-3">Go</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-center">
+                        <h5>Send Money (External)</h5>
+                        <a href="/send_money" class="btn btn-info mt-3">Go</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-center">
+                        <h5>View Transaction History</h5>
+                        <a href="/transactions" class="btn btn-secondary mt-3">Go</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card p-3 text-center">
+                        <h5>Create New Account</h5>
+                        <a href="/create_account" class="btn btn-success mt-3">Create</a>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card p-3 text-center">
-                    <h5>Withdraw Funds</h5>
-                    <a href="/withdraw" class="btn btn-warning mt-3">Go</a>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-3 text-center">
-                    <h5>Transfer Funds (Internal)</h5>
-                    <a href="/transfer" class="btn btn-primary mt-3">Go</a>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-3 text-center">
-                    <h5>Send Money (External)</h5>
-                    <a href="/send_money" class="btn btn-info mt-3">Go</a>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card p-3 text-center">
-                    <h5>View Transaction History</h5>
-                    <a href="/transactions" class="btn btn-secondary mt-3">Go</a>
-                </div>
-            </div>
-        </div>
 
-        <!-- Accounts Section -->
-        <h3 class="mt-5">Your Accounts</h3>
-        <a href="/create_account" class="btn btn-success mb-3">Create New Account</a>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Account Name</th>
-                    <th>Balance</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for account in accounts %}
-                <tr>
-                    <td>
-                        {{ account.name }}
-                        {% if "Savings" in account.name %}
-                        <span class="badge bg-success">Savings</span>
-                        {% elif "Investment" in account.name %}
-                        <span class="badge bg-primary">Investment</span>
-                        {% endif %}
-                    </td>
-                    <td>R {{ account.balance }}</td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="2" class="text-center">No accounts found. Create one now!</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+            <!-- Accounts Section -->
+            <h3 class="mt-5">Your Accounts</h3>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Account Name</th>
+                        <th>Balance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for account in accounts %}
+                    <tr>
+                        <td>
+                            {{ account.name }}
+                            {% if "Savings" in account.name %}
+                            <span class="badge bg-success">Savings</span>
+                            {% elif "Investment" in account.name %}
+                            <span class="badge bg-primary">Investment</span>
+                            {% endif %}
+                        </td>
+                        <td>R {{ account.balance }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="2" class="text-center">No accounts found. Create one now!</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2024 MySite. All Rights Reserved.</p>
+        <p>&copy; 2024 InnovatedBank. All Rights Reserved.</p>
     </footer>
 
     <!-- Bootstrap JS -->

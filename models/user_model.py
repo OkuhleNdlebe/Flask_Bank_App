@@ -91,16 +91,16 @@ class UserModel:
             with open(UserModel.db_path, "r") as file:
                 for line in file:
                     data = line.strip().split(",")
-                    if data[5] == username:
+                    if data[6] == username:  # Username is the 7th field
                         data = [
                             updates.get("name", data[0]),
-                            updates.get("surname", data[1]),
-                            updates.get("phone", data[2]),
-                            updates.get("id_number", data[3]),
-                            updates.get("email", data[4]),
+                            data[1],  # Surname remains the same
+                            data[2],  # Phone remains the same
+                            data[3],  # ID number remains the same
+                            data[4],  # Email remains the same
                             data[5],  # Username remains the same
-                            data[6],  # Password hash remains the same
-                            updates.get("balance", data[7]),
+                            updates.get("password_hash", data[6]),  # Update password hash if provided
+                            data[7],  # Balance remains the same
                         ]
                     lines.append(",".join(data))
 

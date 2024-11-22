@@ -1,0 +1,2 @@
+2024-11-22 10:25:12,Deposit,343.0,Deposit to main account,343.0
+2024-11-22 10:25:21,Deposit,334.0,Deposit to main account,677.0
